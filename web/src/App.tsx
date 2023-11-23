@@ -1,7 +1,26 @@
+// import {} from "socket";
+
+import { useState } from "react";
+import { usePublisher, useSubscriber } from "socket";
+
 function App() {
+  const [messages, setMessages] = useState<string[]>([]);
+  const publish = usePublisher();
+
+  // Subscribe to the "message" channel
+  useSubscriber("message", (msg: string) => {
+    setMessages((prev) => [...prev, msg]);
+  });
+
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("submit");
+
+    const formData = new FormData(e.currentTarget);
+    const msg = formData.get("msg") as string;
+
+    // Publish the message to the "publish" channel
+    publish("publish", msg);
+
     e.currentTarget.reset();
   };
 
@@ -19,7 +38,9 @@ function App() {
 
       <div>
         <h3>Received</h3>
-        <p>Message</p>
+        {messages.map((msg, idx) => (
+          <p key={idx}>{msg}</p>
+        ))}
       </div>
     </>
   );
